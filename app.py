@@ -7,6 +7,7 @@ from PIL import Image
 import numpy as np
 from streamlit_drawable_canvas import st_canvas
 
+# Función para codificar imagen a base64
 def encode_image_to_base64(image_path):
     try:
         with open(image_path, "rb") as image_file:
@@ -15,36 +16,40 @@ def encode_image_to_base64(image_path):
     except FileNotFoundError:
         return "Error: La imagen no se encontró en la ruta especificada."
 
-
+# Configuración inicial de la página
 st.set_page_config(page_title='🎨 Tablero Creativo', layout="centered")
 
-
+# Estilos visuales
 st.markdown("""
     <style>
-        body {
-            background-color: #FFFCF2;
-        }
-        .stApp {
-            background-color: #FFFCF2;
+        html, body, [data-testid="stApp"] {
+            background-color: #e0f7ff;
+            color: #000000;
             font-family: 'Comic Sans MS', cursive, sans-serif;
         }
-        h1, h3, h4, p {
+        .block-container {
+            background-color: #e0f7ff !important;
+        }
+        h1, h3, h4, p, label, span {
+            color: #000000 !important;
             text-align: center;
-            color: #3E3E3E;
         }
         .stTextInput > div > div > input {
             text-align: center;
         }
         .stButton > button {
-            background-color: #FF9F1C;
+            background: linear-gradient(to right, #FFA726, #FB8C00);
             color: white;
             font-weight: bold;
+            font-size: 16px;
+            padding: 12px 24px;
             border-radius: 10px;
-            padding: 10px 20px;
-            margin-top: 20px;
             display: block;
-            margin-left: auto;
-            margin-right: auto;
+            margin: 0 auto;
+            margin-top: 20px;
+        }
+        .stSlider {
+            color: #000000 !important;
         }
         .centered-canvas {
             display: flex;
@@ -55,16 +60,17 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-
+# Título y subtítulo
 st.markdown("<h1>🎨 Tablero Creativo</h1>", unsafe_allow_html=True)
-st.markdown("<h4>¡Dibuja lo que imagines y deja que la inteligencia artificial lo interprete!</h4>", unsafe_allow_html=True)
+st.markdown("<h4>🖌️ ¡Dibuja lo que imagines y deja que la IA lo interprete!</h4>", unsafe_allow_html=True)
 
+# Configuración del canvas
 drawing_mode = "freedraw"
 stroke_width = st.slider('✨ Elige el grosor del pincel', 1, 30, 10)
 stroke_color = "#000000" 
-bg_color = '#FFFDD0'  # color crema suave
+bg_color = '#FFFDD0'  # crema suave
 
-
+# Mostrar canvas
 st.markdown('<div class="centered-canvas">', unsafe_allow_html=True)
 canvas_result = st_canvas(
     fill_color="rgba(255, 165, 0, 0.3)",
@@ -78,15 +84,16 @@ canvas_result = st_canvas(
 )
 st.markdown('</div>', unsafe_allow_html=True)
 
-
+# Input de API key
 ke = st.text_input('🔐 Ingresa tu clave de OpenAI (GPT)')
 os.environ['OPENAI_API_KEY'] = ke
 api_key = os.environ['OPENAI_API_KEY']
 client = OpenAI(api_key=api_key)
 
+# Botón para analizar
 analyze_button = st.button("🔍 Analiza tu dibujo")
 
-
+# Análisis del dibujo
 if canvas_result.image_data is not None and api_key and analyze_button:
     with st.spinner("🎯 Estoy observando tu creación..."):
         input_numpy_array = np.array(canvas_result.image_data)
@@ -117,11 +124,11 @@ if canvas_result.image_data is not None and api_key and analyze_button:
             )
 
             description = response.choices[0].message.content
-            st.markdown(f"<h4>🧠 Esto es lo que veo en tu dibujo:</h4>", unsafe_allow_html=True)
+            st.markdown("<h4>🧠 Esto es lo que veo en tu dibujo:</h4>", unsafe_allow_html=True)
             st.markdown(f"<p style='text-align: center; font-size: 18px;'>{description}</p>", unsafe_allow_html=True)
 
         except Exception as e:
-            st.error(f"Ocurrió un error: {e}")
+            st.error(f"❌ Ocurrió un error: {e}")
 else:
     if not api_key:
         st.warning("🔑 Por favor, ingresa tu clave de API para comenzar.")
